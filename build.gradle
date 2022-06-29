@@ -1,0 +1,56 @@
+plugins {
+    id 'scala'
+    id 'application'
+    id 'com.twilio.guardrail' version '0.64.3'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.scala-lang:scala-library:2.13.6'
+
+    implementation 'ch.qos.logback:logback-classic:1.2.11'
+
+    implementation 'io.circe:circe-core_2.13:0.14.2'
+    implementation 'io.circe:circe-parser_2.13:0.14.2'
+    implementation 'com.typesafe.akka:akka-actor-typed_2.13:2.6.19'
+    implementation 'com.typesafe.akka:akka-stream_2.13:2.6.19'
+    implementation 'com.typesafe.akka:akka-http_2.13:10.2.9'
+    implementation 'dev.guardrail:guardrail-scala-akka-http_2.13:0.74.0'
+    implementation 'org.scalatest:scalatest_2.13:3.2.12'
+
+}
+
+guardrail {
+    api {
+        inputFile = file('specs/api.yaml')
+        gen {
+            kind = 'server'
+            packageName = 'api.gen.sample'
+            language = 'scala'
+            framework = 'akka-http'
+        }
+    }
+}
+
+compileScala.dependsOn guardrail.api.gen
+sourceSets.main.scala.srcDirs += file("${buildDir}/guardrail-sources/scala")
+
+testing {
+    suites {
+        test {
+            useJUnit('4.13.2')
+            dependencies {
+                implementation 'org.scalatest:scalatest_2.13:3.2.10'
+                implementation 'org.scalatestplus:junit-4-13_2.13:3.2.2.0'
+                runtimeOnly 'org.scala-lang.modules:scala-xml_2.13:1.2.0'
+            }
+        }
+    }
+}
+
+application {
+    mainClass = 'api.gen.HttpServer'
+}

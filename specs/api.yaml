@@ -1,0 +1,117 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: API Gen Sample
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:1234
+paths:
+  /users:
+    get:
+      summary: List users
+      operationId: list-users
+      x-scala-package: Users
+      tags:
+        - users
+      parameters:
+        - name: limit
+          in: query
+          description: "Limits of items to return at one time (max 100)"
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "A paged array of users"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Users"
+        500:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      summary: Create a user
+      operationId: create-user
+      x-scala-package: Users
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: "Null response"
+        400:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+
+  /users/{userId}:
+    get:
+      summary: "Info for a single user"
+      operationId: get-user
+      x-scala-package: Users
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: "The id of the user to retrieve"
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Expected response to a valid request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+
+components:
+  schemas:
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+
+    Problem:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
